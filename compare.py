@@ -18,7 +18,7 @@ for row in c.csvlist:
     if word in c.labMTwordList:
         intersection_list.append([word, row[1], c.labMTData[word][1]]) #appending [word, csv_score, labMTScore]
 
-print(intersection_list)
+print(len(intersection_list))
 
 
 
