@@ -5,14 +5,14 @@ from collections import defaultdict
 from nltk.stem.wordnet import WordNetLemmatizer
 
 
-class VerifyResult(object):
+class SentimentDict(object):
 
     def lemmatized_word(self, word):
         if word[0] in ['#', '@']:
             return self.lmtzr.lemmatize(word[1:])
         return self.lmtzr.lemmatize(word)
 
-    def __init__(self):
+    def __init__(self, optimize_labmt=True):
         with open('meanscores.csv', 'r') as csvfile:
             self.wsudata = list(csv.reader(csvfile, delimiter=','))
 
@@ -42,25 +42,26 @@ class VerifyResult(object):
         lang = 'english'
         self.labMTData, self.labMTSentiment, self.labMTwordList = storyLab.emotionFileReader(stopval=0.0, lang=lang, returnVector=True)
 
-        lemmatized_list_labmt = defaultdict(lambda: [])
-        for word in self.labMTwordList:
-            lemmatized_list_labmt[self.lemmatized_word(word.lower())].append(word.lower())
+        if (optimize_labmt):
+            lemmatized_list_labmt = defaultdict(lambda: [])
+            for word in self.labMTwordList:
+                lemmatized_list_labmt[self.lemmatized_word(word.lower())].append(word.lower())
 
-        # recompute sentiment values by calculating average of all non-lemmatized word that belong to a lemmatized word
-        for key, values in lemmatized_list_labmt.items():
-            if len(values) > 1:
-                lst = [float(self.labMTData[value][1]) for value in values]
-                average_sentiment_value = sum(lst) / len(lst)
-                for value in values:
-                    # print(",".join([value, str(self.wsudict[value]), str(average_sentiment_value), str(abs(self.wsudict[value]-average_sentiment_value))]))
-                    self.labMTData[value][1] = average_sentiment_value
+            # recompute sentiment values by calculating average of all non-lemmatized word that belong to a lemmatized word
+            for key, values in lemmatized_list_labmt.items():
+                if len(values) > 1:
+                    lst = [float(self.labMTData[value][1]) for value in values]
+                    average_sentiment_value = sum(lst) / len(lst)
+                    for value in values:
+                        # print(",".join([value, str(self.wsudict[value]), str(average_sentiment_value), str(abs(self.wsudict[value]-average_sentiment_value))]))
+                        self.labMTData[value][1] = average_sentiment_value
 
-        #for key, value in lemmatized_list_labmt.items():
-            #if len(value) > 1:
-                #print(key, " : ", value)
+            #for key, value in lemmatized_list_labmt.items():
+                #if len(value) > 1:
+                    #print(key, " : ", value)
 
 def GenerateTweetSentimentValues(combined = False):
-    c = VerifyResult()
+    c = SentimentDict(False)
     intersection_list = []
     skiprow = True
     for row in c.inputfile:
@@ -73,8 +74,8 @@ def GenerateTweetSentimentValues(combined = False):
         tweet = re.sub(r'\W+', ' ', row[0].strip()).lower().strip()
         for word in tweet.split(' '):
             try:
-                sum += c.wsudict[word]
                 if (c.wsudict[word] > 0):
+                    sum += c.wsudict[word]
                     count += 1
                 elif (c.wsudict[c.lemmatized_word(word)] > 0):
                     sum += c.wsudict[c.lemmatized_word(word)]
@@ -93,4 +94,22 @@ def GenerateTweetSentimentValues(combined = False):
             print(sum/count)
 
 
-GenerateTweetSentimentValues(True)
+#GenerateTweetSentimentValues(True)
+
+def GenerateCSVOfLabMTWSUIntersection():
+    dic = SentimentDict()
+    for key in dic.wsudict.keys():
+        if key in dic.labMTwordList:
+            print(key+","+"Yes")
+        else:
+            print(key+","+"No")
+
+#GenerateCSVOfLabMTWSUIntersection()
+
+def GenerateCSVOfLabMTWSUIntersectionWithDifferenceInSentimentValues():
+    dic = SentimentDict(False)
+    for key in dic.wsudict.keys():
+        if key in dic.labMTwordList:
+            print(key+","+str(dic.labMTData[key][1])+","+str(dic.wsudict[key]))
+
+GenerateCSVOfLabMTWSUIntersectionWithDifferenceInSentimentValues()
