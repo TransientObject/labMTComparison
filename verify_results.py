@@ -9,8 +9,11 @@ import matplotlib.pyplot as plt
 class SentimentDict(object):
 
     def lemmatized_word(self, word):
+        return self.lmtzr.lemmatize(word)
         if word[0] in ['#', '@']:
-            return self.lmtzr.lemmatize(word[1:])
+            return word[1:]
+        return word
+            #return self.lmtzr.lemmatize(word[1:])
         return self.lmtzr.lemmatize(word)
 
     def __init__(self, optimize_labmt=True):
@@ -34,25 +37,26 @@ class SentimentDict(object):
                     #print(",".join([value, str(self.wsudict[value]), str(average_sentiment_value), str(abs(self.wsudict[value]-average_sentiment_value))]))
                     self.wsudict[value] = average_sentiment_value
 
-        for key, value in lemmatized_list.items():
-            if len(value) > 1:
-                print(key, " : ", value )
-            if len(value) == 1 and value[0] != key:
-                print(key, " : ", value)
-
-        with open('toverify2.csv', 'r') as csvfile:
-            self.inputfile = list(csv.reader(csvfile, delimiter=','))
-        lang = 'english'
-        self.labMTData, self.labMTSentiment, self.labMTwordList = storyLab.emotionFileReader(stopval=0.0, lang=lang, returnVector=True)
-
-        for word in self.labMTwordList:
-            if word.lower() != self.lemmatized_word(word.lower()):
-                if self.lemmatized_word(word.lower()) not in lemmatized_list.keys():
-                    print("new group added", word)
-                lemmatized_list[self.lemmatized_word(word.lower())].append(word.lower())
+        #for key, value in lemmatized_list.items():
+            #if len(value) > 1:
+                #print(key, " : ", value )
+            #if len(value) == 1 and value[0] != key:
+                #print(key, " : ", value)
 
         if (optimize_labmt):
+
             lemmatized_list_labmt = defaultdict(lambda: [])
+
+            with open('toverify2.csv', 'r') as csvfile:
+                self.inputfile = list(csv.reader(csvfile, delimiter=','))
+            lang = 'english'
+            self.labMTData, self.labMTSentiment, self.labMTwordList = storyLab.emotionFileReader(stopval=0.0, lang=lang,
+                                                                                                 returnVector=True)
+
+            for word in self.labMTwordList:
+                if word.lower() != self.lemmatized_word(word.lower()):
+                    lemmatized_list_labmt[self.lemmatized_word(word.lower())].append(word.lower())
+
             for word in self.labMTwordList:
                 lemmatized_list_labmt[self.lemmatized_word(word.lower())].append(word.lower())
 
@@ -70,7 +74,7 @@ class SentimentDict(object):
                     #print(key, " : ", value)
 
 def GenerateTweetSentimentValues(combined = False):
-    c = SentimentDict(False)
+    c = SentimentDict(True)
     intersection_list = []
     skiprow = True
     for row in c.inputfile:
@@ -97,13 +101,12 @@ def GenerateTweetSentimentValues(combined = False):
                     count += 1
             except Exception as exc:
                 print(exc)
-                #print("tweet - ", tweet, "\n", "word - ", tweet.split(' '), "\n")
 
         if (count > 0):
             print(sum/count)
 
 
-GenerateTweetSentimentValues()
+GenerateTweetSentimentValues(True)
 
 def GenerateCSVOfLabMTWSUIntersection():
     dic = SentimentDict()
