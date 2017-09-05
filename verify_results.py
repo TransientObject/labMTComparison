@@ -3,7 +3,8 @@ from labMTsimple import storyLab
 import re
 from collections import defaultdict
 from nltk.stem.wordnet import WordNetLemmatizer
-
+import numpy as np
+import matplotlib.pyplot as plt
 
 class SentimentDict(object):
 
@@ -33,14 +34,22 @@ class SentimentDict(object):
                     #print(",".join([value, str(self.wsudict[value]), str(average_sentiment_value), str(abs(self.wsudict[value]-average_sentiment_value))]))
                     self.wsudict[value] = average_sentiment_value
 
-        #for key, value in lemmatized_list.items():
-            #if len(value) > 1:
-                #print(key, " : ", value )
+        for key, value in lemmatized_list.items():
+            if len(value) > 1:
+                print(key, " : ", value )
+            if len(value) == 1 and value[0] != key:
+                print(key, " : ", value)
 
         with open('toverify2.csv', 'r') as csvfile:
             self.inputfile = list(csv.reader(csvfile, delimiter=','))
         lang = 'english'
         self.labMTData, self.labMTSentiment, self.labMTwordList = storyLab.emotionFileReader(stopval=0.0, lang=lang, returnVector=True)
+
+        for word in self.labMTwordList:
+            if word.lower() != self.lemmatized_word(word.lower()):
+                if self.lemmatized_word(word.lower()) not in lemmatized_list.keys():
+                    print("new group added", word)
+                lemmatized_list[self.lemmatized_word(word.lower())].append(word.lower())
 
         if (optimize_labmt):
             lemmatized_list_labmt = defaultdict(lambda: [])
@@ -94,7 +103,7 @@ def GenerateTweetSentimentValues(combined = False):
             print(sum/count)
 
 
-#GenerateTweetSentimentValues(True)
+GenerateTweetSentimentValues()
 
 def GenerateCSVOfLabMTWSUIntersection():
     dic = SentimentDict()
@@ -112,4 +121,49 @@ def GenerateCSVOfLabMTWSUIntersectionWithDifferenceInSentimentValues():
         if key in dic.labMTwordList:
             print(key+","+str(dic.labMTData[key][1])+","+str(dic.wsudict[key]))
 
-GenerateCSVOfLabMTWSUIntersectionWithDifferenceInSentimentValues()
+#GenerateCSVOfLabMTWSUIntersectionWithDifferenceInSentimentValues()
+
+
+def GenerateHistogram():
+    with open('sentiment_scores.csv', 'r') as csvfile:
+        sentiment_data = list(csv.reader(csvfile, delimiter=','))
+
+    plot_input_list = []
+    skipRow = True
+    for row in sentiment_data:
+        if skipRow:
+            skipRow = False
+            continue
+        plot_input_list.append([float(x) for x in row[1:]])
+
+    colors = ['red', 'green', 'blue']
+    labels = ['labmt', 'wsu', 'combined']
+    plt.hist(np.array(plot_input_list), 9, normed=1, histtype='bar', color=colors, label=labels)
+    plt.legend(prop={'size': 9})
+    plt.title('histogram with sentiment values in different dictionary binned by the sentiment score')
+    plt.show()
+
+#GenerateHistogram()
+
+def GenerateScatterPlot():
+    with open('sentiment_scores.csv', 'r') as csvfile:
+        sentiment_data = list(csv.reader(csvfile, delimiter=','))
+
+    plot_x = []
+    plot_y = []
+    skipRow = True
+    for row in sentiment_data:
+        if skipRow:
+            skipRow = False
+            continue
+        plot_x.append(float(row[1]))
+        plot_y.append(float(row[3]))
+
+    plt.scatter(plot_x, plot_y, alpha=0.5)
+    plt.legend(prop={'size': 9})
+    plt.xlabel("LabMT Sentiment")
+    plt.ylabel("Combined Sentiment")
+    plt.title('How the 130 tweets are scattered against labmt and combined sentiment values')
+    plt.show()
+
+#GenerateScatterPlot()
