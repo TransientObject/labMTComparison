@@ -175,14 +175,14 @@ def GenerateHistogram():
             continue
         plot_input_list.append([float(x) for x in row[4:]])
 
-    colors = ['red', 'green']
+    colors = ['blue', 'yellow']
     labels = ['labmt', 'travelmt']
     plt.hist(np.array(plot_input_list), 9, normed=1, histtype='bar', color=colors, label=labels)
     plt.legend(prop={'size': 9})
-    plt.title('histogram with sentiment values in different dictionary binned by the sentiment score')
+    # plt.title('Histogram with Sentiment values in LabMT and TravelMT \n', fontsize = 12, fontweight = 'bold', )
     plt.show()
 
-#GenerateHistogram()
+GenerateHistogram()
 
 def GenerateScatterPlot(x_index, y_index, x_label, y_label):
     with open('sentiment_scores.csv', 'r') as csvfile:
@@ -201,14 +201,14 @@ def GenerateScatterPlot(x_index, y_index, x_label, y_label):
     plt.scatter(plot_x, plot_y, alpha=0.5)
     plt.legend(prop={'size': 9})
     plt.plot([int(min(plot_x))-1,int(max(plot_x))+1], [int(min(plot_x))-1,int(max(plot_x))+1])
-    plt.plot([int(min(plot_x)) - 1, int(max(plot_x))], [int(min(plot_x)), int(max(plot_x)) + 1])
-    plt.plot([int(min(plot_x)), int(max(plot_x)) + 1], [int(min(plot_x)) - 1, int(max(plot_x))])
+    plt.plot([int(min(plot_x)) - 1, int(max(plot_x))], [int(min(plot_x)), int(max(plot_x)) + 1], '--', color = "orange")
+    plt.plot([int(min(plot_x)), int(max(plot_x)) + 1], [int(min(plot_x)) - 1, int(max(plot_x))], '--', color = "orange")
     #plt.plot([0,9], [0,9])
     #plt.plot([0,8], [1,9])
     #plt.plot([1,9], [0,8])
-    plt.xlabel(x_label)
-    plt.ylabel(y_label)
-    plt.title("How the 130 tweets are scattered against "+ x_label +" and "+ y_label + " sentiment values")
+    plt.xlabel(x_label, fontsize = 12)
+    plt.ylabel(y_label,  fontsize = 12)
+    # plt.title("Sentiment score across all tweets : "+ x_label +" and "+ y_label, fontweight = 'bold', fontsize = 14 )
     plt.show()
 
 # GenerateScatterPlot(1,5, "Human", "TravelMT")
