@@ -65,6 +65,8 @@ class SentimentDict(object):
         sum = 0
         count = 0
         for word in tweet.split(' '):
+            if (len(word) == 0):
+                continue
             if (self.wsudict[word] > 0):
                 sum += self.wsudict[word]
                 count += 1
@@ -77,6 +79,8 @@ class SentimentDict(object):
         sum = 0
         count = 0
         for word in tweet.split(' '):
+            if (len(word) == 0):
+                continue
             if (word in self.labMTData.keys() and float(self.labMTData[word][1]) > 0):
                 sum += float(self.labMTData[word][1])
                 count += 1
@@ -89,6 +93,8 @@ class SentimentDict(object):
         sum = 0
         count = 0
         for word in tweet.split(' '):
+            if (len(word) == 0):
+                continue
             if (self.wsudict[word] > 0):
                 sum += self.wsudict[word]
                 count += 1
@@ -104,6 +110,8 @@ class SentimentDict(object):
         sum = 0
         count = 0
         for word in tweet.split(' '):
+            if (len(word) == 0):
+                continue
             word = self.lemmatized_word(word)
             if (self.wsudict[word] > 0):
                 sum += self.wsudict[word]
@@ -124,7 +132,7 @@ def GenerateTweetSentimentValues(mode = 'wsu', optimize_dict = False):
             skiprow = False
             continue
 
-        tweet = re.sub(r'\W+', ' ', row[0].strip()).lower().strip()
+        tweet = row[0].strip().lower().strip()
         if (mode == 'wsu'):
             print(c.GetWSUSentimentScore(tweet))
         elif (mode == 'labmt'):
@@ -134,7 +142,7 @@ def GenerateTweetSentimentValues(mode = 'wsu', optimize_dict = False):
         elif (mode == 'travelmt'):
             print(c.GetTravelMTSentimentScore(tweet))
 
-#GenerateTweetSentimentValues('travelmt', True)
+GenerateTweetSentimentValues('travelmt', True)
 
 def GenerateCSVOfLabMTWSUIntersection():
     dic = SentimentDict()
@@ -203,6 +211,6 @@ def GenerateScatterPlot(x_index, y_index, x_label, y_label):
     plt.title("How the 130 tweets are scattered against "+ x_label +" and "+ y_label + " sentiment values")
     plt.show()
 
-GenerateScatterPlot(1,5, "Human", "TravelMT")
-GenerateScatterPlot(2,5, "LabMT", "TravelMT")
-GenerateScatterPlot(1,2, "Human", "LabMT")
+# GenerateScatterPlot(1,5, "Human", "TravelMT")
+# GenerateScatterPlot(2,5, "LabMT", "TravelMT")
+# GenerateScatterPlot(1,2, "Human", "LabMT")
