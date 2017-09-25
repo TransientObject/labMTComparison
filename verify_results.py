@@ -5,6 +5,7 @@ from collections import defaultdict
 from nltk.stem.wordnet import WordNetLemmatizer
 import numpy as np
 import matplotlib.pyplot as plt
+from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
 class SentimentDict(object):
 
@@ -14,6 +15,9 @@ class SentimentDict(object):
         return word
 
     def __init__(self, optimize_dict=True):
+
+        self.vaderAnalyzer = SentimentIntensityAnalyzer()
+
         with open('meanscores.csv', 'r') as csvfile:
             self.wsudata = list(csv.reader(csvfile, delimiter=','))
 
@@ -61,10 +65,19 @@ class SentimentDict(object):
                         # print(",".join([value, str(self.wsudict[value]), str(average_sentiment_value), str(abs(self.wsudict[value]-average_sentiment_value))]))
                         self.labMTData[value][1] = average_sentiment_value
 
+    def GetVaderSentimentScore(self, tweet):
+        #words = [x.strip() for x in re.findall(r"[\w\@\#\'\&\]\*\-\/\[\=\;\!\?]+", tweet, flags=re.UNICODE)]
+        #vaderScores = self.vaderAnalyzer.polarity_scores(' '.join(list(filter(None, words))))
+        vaderScores = self.vaderAnalyzer.polarity_scores(tweet)
+        return 4.0 * (vaderScores['compound']) + 5.0
+
     def GetWSUSentimentScore(self, tweet):
         sum = 0
         count = 0
-        for word in tweet.split(' '):
+        words = [x.lower() for x in re.findall(r"[\w\@\#\'\&\]\*\-\/\[\=\;]+", tweet, flags=re.UNICODE)]
+        for word in words:
+            if (len(word) == 0):
+                continue
             if (self.wsudict[word] > 0):
                 sum += self.wsudict[word]
                 count += 1
@@ -76,7 +89,10 @@ class SentimentDict(object):
     def GetLabMTSentimentScore(self, tweet):
         sum = 0
         count = 0
-        for word in tweet.split(' '):
+        words = [x.lower() for x in re.findall(r"[\w\@\#\'\&\]\*\-\/\[\=\;]+", tweet, flags=re.UNICODE)]
+        for word in words:
+            if (len(word) == 0):
+                continue
             if (word in self.labMTData.keys() and float(self.labMTData[word][1]) > 0):
                 sum += float(self.labMTData[word][1])
                 count += 1
@@ -88,7 +104,10 @@ class SentimentDict(object):
     def GetCombinedSentimentScore(self, tweet):
         sum = 0
         count = 0
-        for word in tweet.split(' '):
+        words = [x.lower() for x in re.findall(r"[\w\@\#\'\&\]\*\-\/\[\=\;]+", tweet, flags=re.UNICODE)]
+        for word in words:
+            if (len(word) == 0):
+                continue
             if (self.wsudict[word] > 0):
                 sum += self.wsudict[word]
                 count += 1
@@ -103,7 +122,10 @@ class SentimentDict(object):
     def GetTravelMTSentimentScore(self, tweet):
         sum = 0
         count = 0
-        for word in tweet.split(' '):
+        words = [x.lower() for x in re.findall(r"[\w\@\#\'\&\]\*\-\/\[\=\;]+", tweet, flags=re.UNICODE)]
+        for word in words:
+            if (len(word) == 0):
+                continue
             word = self.lemmatized_word(word)
             if (self.wsudict[word] > 0):
                 sum += self.wsudict[word]
@@ -124,7 +146,7 @@ def GenerateTweetSentimentValues(mode = 'wsu', optimize_dict = False):
             skiprow = False
             continue
 
-        tweet = re.sub(r'\W+', ' ', row[0].strip()).lower().strip()
+        tweet = row[0]
         if (mode == 'wsu'):
             print(c.GetWSUSentimentScore(tweet))
         elif (mode == 'labmt'):
@@ -133,8 +155,10 @@ def GenerateTweetSentimentValues(mode = 'wsu', optimize_dict = False):
             print(c.GetCombinedSentimentScore(tweet))
         elif (mode == 'travelmt'):
             print(c.GetTravelMTSentimentScore(tweet))
+        elif (mode == 'vader'):
+            print(c.GetVaderSentimentScore(tweet))
 
-#GenerateTweetSentimentValues('travelmt', True)
+GenerateTweetSentimentValues('vader', False)
 
 def GenerateCSVOfLabMTWSUIntersection():
     dic = SentimentDict()
@@ -174,7 +198,7 @@ def GenerateHistogram():
     # plt.title('Histogram with Sentiment values in LabMT and TravelMT \n', fontsize = 12, fontweight = 'bold', )
     plt.show()
 
-GenerateHistogram()
+#GenerateHistogram()
 
 def GenerateScatterPlot(x_index, y_index, x_label, y_label):
     with open('sentiment_scores.csv', 'r') as csvfile:
@@ -203,6 +227,6 @@ def GenerateScatterPlot(x_index, y_index, x_label, y_label):
     # plt.title("Sentiment score across all tweets : "+ x_label +" and "+ y_label, fontweight = 'bold', fontsize = 14 )
     plt.show()
 
-GenerateScatterPlot(1,5, "Human", "TravelMT")
-GenerateScatterPlot(2,5, "LabMT", "TravelMT")
-GenerateScatterPlot(1,2, "Human", "LabMT")
+#GenerateScatterPlot(1,5, "Human", "TravelMT")
+#GenerateScatterPlot(2,5, "LabMT", "TravelMT")
+#GenerateScatterPlot(1,2, "Human", "LabMT")
