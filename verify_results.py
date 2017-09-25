@@ -64,7 +64,8 @@ class SentimentDict(object):
     def GetWSUSentimentScore(self, tweet):
         sum = 0
         count = 0
-        for word in tweet.split(' '):
+        words = [x.lower() for x in re.findall(r"[\w\@\#\'\&\]\*\-\/\[\=\;]+", tweet, flags=re.UNICODE)]
+        for word in words:
             if (len(word) == 0):
                 continue
             if (self.wsudict[word] > 0):
@@ -78,7 +79,8 @@ class SentimentDict(object):
     def GetLabMTSentimentScore(self, tweet):
         sum = 0
         count = 0
-        for word in tweet.split(' '):
+        words = [x.lower() for x in re.findall(r"[\w\@\#\'\&\]\*\-\/\[\=\;]+", tweet, flags=re.UNICODE)]
+        for word in words:
             if (len(word) == 0):
                 continue
             if (word in self.labMTData.keys() and float(self.labMTData[word][1]) > 0):
@@ -92,7 +94,8 @@ class SentimentDict(object):
     def GetCombinedSentimentScore(self, tweet):
         sum = 0
         count = 0
-        for word in tweet.split(' '):
+        words = [x.lower() for x in re.findall(r"[\w\@\#\'\&\]\*\-\/\[\=\;]+", tweet, flags=re.UNICODE)]
+        for word in words:
             if (len(word) == 0):
                 continue
             if (self.wsudict[word] > 0):
@@ -109,7 +112,8 @@ class SentimentDict(object):
     def GetTravelMTSentimentScore(self, tweet):
         sum = 0
         count = 0
-        for word in tweet.split(' '):
+        words = [x.lower() for x in re.findall(r"[\w\@\#\'\&\]\*\-\/\[\=\;]+", tweet, flags=re.UNICODE)]
+        for word in words:
             if (len(word) == 0):
                 continue
             word = self.lemmatized_word(word)
@@ -211,6 +215,6 @@ def GenerateScatterPlot(x_index, y_index, x_label, y_label):
     # plt.title("Sentiment score across all tweets : "+ x_label +" and "+ y_label, fontweight = 'bold', fontsize = 14 )
     plt.show()
 
-# GenerateScatterPlot(1,5, "Human", "TravelMT")
-# GenerateScatterPlot(2,5, "LabMT", "TravelMT")
-# GenerateScatterPlot(1,2, "Human", "LabMT")
+GenerateScatterPlot(1,5, "Human", "TravelMT")
+GenerateScatterPlot(2,5, "LabMT", "TravelMT")
+GenerateScatterPlot(1,2, "Human", "LabMT")
