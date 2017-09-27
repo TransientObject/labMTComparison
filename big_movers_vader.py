@@ -25,10 +25,11 @@ vaderDict = vaderAnalyzer.lexicon
 commonWords = list(set(wsudict.keys()).intersection(vaderDict.keys()))
 print("commonWords length", len(commonWords))
 
-moverDict = defaultdict(float)
+moverDict = defaultdict(lambda: [])
 
 for word in commonWords:
-    moverDict[word] = abs(normalize(vaderDict[word]) - wsudict[word])
+    val = normalize(vaderDict[word]) - wsudict[word]
+    moverDict[word] = [abs(val), val]
 
 print("top 20 movers")
 [print(x) for x in [(key, moverDict[key])for key in sorted(moverDict, key=moverDict.get, reverse=True)][0:20]]
