@@ -52,4 +52,42 @@ def GenerateScatterPlot(x_index, y_index, x_label, y_label):
 #GenerateScatterPlot(1,2, "Human", "LabMT")
 
 #GenerateScatterPlot(1,6, "Human", "Vader")
-GenerateScatterPlot(1,7, "Human", "Vader With Regex")
+#GenerateScatterPlot(1,7, "Human", "Vader With Regex")
+
+def GenerateAccuracyPlot(x_index, y_index, x_neutral, y_neutral):
+    with open('sentiment_scores.csv', 'r') as csvfile:
+        sentiment_data = list(csv.reader(csvfile, delimiter=','))[1:]
+
+    range = 0.5
+    range_x = []
+    accuracy_y = []
+    range_x_ticks = []
+    while(range <= 4.5):
+        correct_classification = 0
+        incorrect_classification = 0
+        for row in sentiment_data:
+            if(abs(float(row[x_index]) - x_neutral) > range):
+                continue
+            if (float(row[x_index]) > x_neutral and float(row[y_index]) > y_neutral) or (float(row[x_index]) < x_neutral and float(row[y_index]) < y_neutral):
+                correct_classification += 1
+            else:
+                incorrect_classification += 1
+
+        accuracy = correct_classification * 1.0 / (correct_classification + incorrect_classification)
+        #print("range, accuracy", range, accuracy)
+        range_x_ticks.append(str(4.5-range)+"-"+str(4.5+range))
+        range_x.append(range)
+        accuracy_y.append(accuracy)
+        range += 0.5
+
+    plt.plot(range_x, accuracy_y, 'go-')
+    plt.ylabel("accuracy")
+    plt.xlabel("human sentiment range")
+    plt.xticks(range_x, range_x_ticks)
+    plt.show()
+
+GenerateAccuracyPlot(1,5,4.5,4.5)
+
+
+
+
